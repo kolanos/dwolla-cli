@@ -18,7 +18,6 @@ var configFile string
 var rootCmd = &cobra.Command{
 	Use:   "dwolla",
 	Short: "A CLI for the Dwolla v2 API",
-	Long:  "",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -61,7 +60,7 @@ func initClient() {
 		environment = dwolla.Production
 	}
 
-	if viper.GetString("sandbox") == "sandbox" {
+	if viper.GetString("environment") == "sandbox" {
 		environment = dwolla.Sandbox
 	}
 
@@ -85,12 +84,9 @@ func initConfig() {
 	viper.SetEnvPrefix("dwolla")
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-
-	fmt.Println("Using config file:", viper.ConfigFileUsed())
 }
 
 func homeDir() string {
