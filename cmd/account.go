@@ -3,16 +3,22 @@ package cmd
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"strconv"
+	"strings"
 
+	"github.com/kolanos/dwolla-v2-go"
 	"github.com/spf13/cobra"
-	//"github.com/spf13/viper"
 )
 
 var accountPaymentListCorrelationID string
 var accountPaymentListLimit int
 var accountPaymentListOffset int
+
+var accountSourceCreateAccountNumber string
+var accountSourceCreateBankAccountType string
+var accountSourceCreateChannels string
+var accountSourceCreateName string
+var accountSourceCreateRoutingNumber string
 
 var accountSourceListRemoved bool
 
@@ -58,14 +64,12 @@ var accountPaymentListCmd = &cobra.Command{
 
 		act, err := client.Account.Retrieve()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			renderError(err)
 		}
 
 		res, err := act.ListMassPayments(params)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			renderError(err)
 		}
 
 		data := make([][]string, len(res.Embedded["mass-payments"]))
@@ -89,8 +93,7 @@ var accountRetrieveCmd = &cobra.Command{
 
 		res, err := client.Account.Retrieve()
 		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			renderError(err)
 		}
 
 		renderResource(res)
@@ -104,7 +107,44 @@ var accountSourceCmd = &cobra.Command{
 var accountSourceCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create Account Funding Source",
-	Run:   func(cmd *cobra.Command, args []string) {},
+	Run: func(cmd *cobra.Command, args []string) {
+		initClient()
+
+		act, err := client.Account.Retrieve()
+		if err != nil {
+			renderError(err)
+		}
+
+		var bankAccountType dwolla.FundingSourceBankAccountType
+		switch accountSourceCreateBankAccountType {
+		case "checking":
+			bankAccountType = dwolla.FundingSourceBankAccountTypeChecking
+		case "savings":
+			bankAccountType = dwolla.FundingSourceBankAccountTypeSavings
+		default:
+			renderError(fmt.Errorf("Invalid bank account type: %s", accountSourceCreateBankAccountType))
+		}
+
+		var channels []string
+
+		if accountSourceCreateChannels != "" {
+			channels = strings.Split(accountSourceCreateChannels, ",")
+		}
+
+		res, err := act.CreateFundingSource(&dwolla.FundingSourceRequest{
+			RoutingNumber:   accountSourceCreateRoutingNumber,
+			AccountNumber:   accountSourceCreateAccountNumber,
+			BankAccountType: bankAccountType,
+			Name:            accountSourceCreateName,
+			Channels:        channels,
+		})
+
+		if err != nil {
+			renderError(err)
+		}
+
+		renderResource(res)
+	},
 }
 
 var accountSourceListCmd = &cobra.Command{
@@ -115,14 +155,12 @@ var accountSourceListCmd = &cobra.Command{
 
 		act, err := client.Account.Retrieve()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			renderError(err)
 		}
 
 		res, err := act.ListFundingSources(accountSourceListRemoved)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			renderError(err)
 		}
 
 		data := make([][]string, len(res.Embedded["funding-sources"]))
@@ -189,14 +227,12 @@ var accountTransferListCmd = &cobra.Command{
 
 		act, err := client.Account.Retrieve()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			renderError(err)
 		}
 
 		res, err := act.ListTransfers(params)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			renderError(err)
 		}
 
 		data := make([][]string, len(res.Embedded["transfers"]))
@@ -230,6 +266,16 @@ func init() {
 	accountPaymentListCmd.Flags().StringVar(&accountPaymentListCorrelationID, "correlation-id", "", "filter by correlation id")
 	accountPaymentListCmd.Flags().IntVar(&accountPaymentListLimit, "limit", 25, "number of results to return")
 	accountPaymentListCmd.Flags().IntVar(&accountPaymentListOffset, "offset", 0, "number of results to skip")
+
+	accountSourceCreateCmd.Flags().StringVar(&accountSourceCreateAccountNumber, "account-number", "", "bank account number (required)")
+	accountSourceCreateCmd.MarkFlagRequired("account-number")
+	accountSourceCreateCmd.Flags().StringVar(&accountSourceCreateBankAccountType, "account-type", "", "bank account type (required)")
+	accountSourceCreateCmd.MarkFlagRequired("account-type")
+	accountSourceCreateCmd.Flags().StringVar(&accountSourceCreateChannels, "channels", "", "bank account channels (comma separated)")
+	accountSourceCreateCmd.Flags().StringVar(&accountSourceCreateName, "name", "", "bank account nickname (required)")
+	accountSourceCreateCmd.MarkFlagRequired("name")
+	accountSourceCreateCmd.Flags().StringVar(&accountSourceCreateRoutingNumber, "routing-number", "", "bank routing number (required)")
+	accountSourceCreateCmd.MarkFlagRequired("routing-number")
 
 	accountSourceListCmd.Flags().BoolVarP(&accountSourceListRemoved, "removed", "r", false, "include removed funding sources")
 
