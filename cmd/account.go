@@ -75,8 +75,9 @@ var accountPaymentListCmd = &cobra.Command{
 		}
 
 		header := []string{"ID", "Status", "Total Amount", "Total Fees Amount", "created", "Correlation ID"}
+		footer := []string{"", "", "", "", "Total", strconv.Itoa(res.Total)}
 
-		renderCollection(data, header)
+		renderCollection(data, header, footer)
 	},
 }
 
@@ -131,8 +132,9 @@ var accountSourceListCmd = &cobra.Command{
 		}
 
 		header := []string{"ID", "Status", "Type", "Account Type", "Name", "Bank Name", "Created"}
+		footer := []string{"", "", "", "", "", "Total", strconv.Itoa(res.Total)}
 
-		renderCollection(data, header)
+		renderCollection(data, header, footer)
 	},
 }
 
@@ -204,8 +206,9 @@ var accountTransferListCmd = &cobra.Command{
 		}
 
 		header := []string{"ID", "Status", "Amount", "Created", "Correlation ID"}
+		footer := []string{"", "", "", "Total", strconv.Itoa(res.Total)}
 
-		renderCollection(data, header)
+		renderCollection(data, header, footer)
 	},
 }
 

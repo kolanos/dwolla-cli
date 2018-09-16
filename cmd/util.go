@@ -9,9 +9,10 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func renderCollection(data [][]string, header []string) {
+func renderCollection(data [][]string, header []string, footer []string) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
+	table.SetFooter(footer)
 	table.SetBorder(false)
 	table.AppendBulk(data)
 	table.Render()
