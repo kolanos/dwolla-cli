@@ -35,18 +35,19 @@ func init() {
 
 	persistentFlags := rootCmd.PersistentFlags()
 
-	persistentFlags.StringVar(&configFile, "config", "", fmt.Sprintf("config file (default: %s)", defaultConfigFile))
+	persistentFlags.StringVarP(&configFile, "config", "c", "", fmt.Sprintf("config file (default: %s)", defaultConfigFile))
 
-	persistentFlags.String("key", "", "Override configured Dwolla API Key")
+	persistentFlags.StringP("key", "k", "", "dwolla api key")
 	viper.BindPFlag("apiKey", persistentFlags.Lookup("key"))
 
-	persistentFlags.String("secret", "", "Override configured Dwolla API secret")
+	persistentFlags.StringP("secret", "s", "", "dwolla api secret")
 	viper.BindPFlag("apiSecret", persistentFlags.Lookup("secret"))
 
-	persistentFlags.String("environment", "", "Override configured Dwolla API environment")
+	persistentFlags.StringP("environment", "e", "", "dwolla api environment (default: production)")
 	viper.BindPFlag("environment", persistentFlags.Lookup("environment"))
 
-	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	persistentFlags.BoolP("verbose", "v", false, "increase verbosity")
+	viper.BindPFlag("verbose", persistentFlags.Lookup("verbose"))
 }
 
 func initClient() {
@@ -54,14 +55,26 @@ func initClient() {
 		return
 	}
 
-	var environment dwolla.Environment
-
-	if viper.GetString("environment") == "production" {
-		environment = dwolla.Production
+	if !viper.IsSet("apiKey") {
+		fmt.Println("No dwolla api key configured")
+		os.Exit(1)
 	}
 
-	if viper.GetString("environment") == "sandbox" {
+	if !viper.IsSet("apiSecret") {
+		fmt.Println("No dwolla api secret configured")
+		os.Exit(1)
+	}
+
+	var environment dwolla.Environment
+
+	switch viper.GetString("environment") {
+	case "production":
+		environment = dwolla.Production
+	case "sandbox":
 		environment = dwolla.Sandbox
+	default:
+		fmt.Println("Invalid dwolla environment:", viper.GetString("environment"))
+		os.Exit(1)
 	}
 
 	client = dwolla.New(viper.GetString("apiKey"), viper.GetString("apiSecret"), environment)
@@ -85,7 +98,9 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		if viper.GetBool("verbose") {
+			fmt.Println("Using config file:", viper.ConfigFileUsed())
+		}
 	}
 }
 

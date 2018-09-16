@@ -5,7 +5,17 @@ import (
 	"os"
 	"reflect"
 	"text/tabwriter"
+
+	"github.com/olekukonko/tablewriter"
 )
+
+func renderCollection(data [][]string, header []string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(header)
+	table.SetBorder(false)
+	table.AppendBulk(data)
+	table.Render()
+}
 
 func renderResource(res interface{}) {
 	s := reflect.ValueOf(res).Elem()
