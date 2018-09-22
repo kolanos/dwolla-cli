@@ -34,17 +34,17 @@ var accountTransferListStatus string
 
 var accountCmd = &cobra.Command{
 	Use:   "account",
-	Short: "Account Management",
+	Short: "Account management",
 }
 
 var accountPaymentCmd = &cobra.Command{
 	Use:   "payment",
-	Short: "Account Mass Payment Management",
+	Short: "Mass payment management",
 }
 
 var accountPaymentListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List Account Mass Payments",
+	Short: "List mass payments",
 	Run: func(cmd *cobra.Command, args []string) {
 		initClient()
 
@@ -87,7 +87,7 @@ var accountPaymentListCmd = &cobra.Command{
 
 var accountRetrieveCmd = &cobra.Command{
 	Use:   "retrieve",
-	Short: "Retrieve Account Details",
+	Short: "Retrieve account details",
 	Run: func(cmd *cobra.Command, args []string) {
 		initClient()
 
@@ -101,12 +101,12 @@ var accountRetrieveCmd = &cobra.Command{
 }
 var accountSourceCmd = &cobra.Command{
 	Use:   "source",
-	Short: "Account Funding Source Management",
+	Short: "Funding source management",
 }
 
 var accountSourceCreateCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create Account Funding Source",
+	Short: "Create funding source",
 	Run: func(cmd *cobra.Command, args []string) {
 		initClient()
 
@@ -149,7 +149,7 @@ var accountSourceCreateCmd = &cobra.Command{
 
 var accountSourceListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List Account Funding Sources",
+	Short: "List funding sources",
 	Run: func(cmd *cobra.Command, args []string) {
 		initClient()
 
@@ -169,8 +169,8 @@ var accountSourceListCmd = &cobra.Command{
 			data[i] = []string{d.ID, string(d.Status), string(d.Type), string(d.BankAccountType), d.Name, d.BankName, strconv.FormatBool(d.Removed), d.Created}
 		}
 
-		header := []string{"ID", "Status", "Type", "Account Type", "Name", "Bank Name", "Created"}
-		footer := []string{"", "", "", "", "", "Total", strconv.Itoa(res.Total)}
+		header := []string{"ID", "Status", "Type", "Account Type", "Name", "Bank Name", "Removed", "Created"}
+		footer := []string{}
 
 		renderCollection(data, header, footer)
 	},
@@ -178,12 +178,12 @@ var accountSourceListCmd = &cobra.Command{
 
 var accountTransferCmd = &cobra.Command{
 	Use:   "transfer",
-	Short: "Account Transfer Management",
+	Short: "Transfer management",
 }
 
 var accountTransferListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List Account Transfers",
+	Short: "List transfers",
 	Run: func(cmd *cobra.Command, args []string) {
 		initClient()
 
@@ -277,7 +277,7 @@ func init() {
 	accountSourceCreateCmd.Flags().StringVar(&accountSourceCreateRoutingNumber, "routing-number", "", "bank routing number (required)")
 	accountSourceCreateCmd.MarkFlagRequired("routing-number")
 
-	accountSourceListCmd.Flags().BoolVarP(&accountSourceListRemoved, "removed", "r", false, "include removed funding sources")
+	accountSourceListCmd.Flags().BoolVarP(&accountSourceListRemoved, "removed", "r", false, "show removed funding sources")
 
 	accountTransferListCmd.Flags().StringVar(&accountTransferListCorrelationID, "correlation-id", "", "filter by correlation id")
 	accountTransferListCmd.Flags().StringVar(&accountTransferListEndAmount, "end-amount", "", "filter by end amount")

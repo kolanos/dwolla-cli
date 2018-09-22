@@ -21,7 +21,10 @@ func renderCollection(data [][]string, header []string, footer []string) {
 	}
 	table.SetBorder(false)
 	table.AppendBulk(data)
+
+	fmt.Println("")
 	table.Render()
+	fmt.Println("")
 }
 
 func renderError(err error) {
